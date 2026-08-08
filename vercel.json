@@ -1,6 +1,4 @@
-{
-  "version": 2,
-  "functions": {
-    "api/tts.js": { "maxDuration": 10 }
-  }
-}
+const http = require('http');
+const handler = require('./api/tts.js');
+const PORT = process.env.PORT || 3000;
+http.createServer(handler).listen(PORT, () => console.log('edge-tts relay running on http://localhost:' + PORT));
