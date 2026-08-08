@@ -21,10 +21,29 @@ module.exports = async (req, res) => {
   try {
     const tts = new edgeTts.TTS(voice, rate);
     const stream = tts.toStream(text);
-    res.setHeader('Content-Type', 'audio/mpeg');
-    stream.on('error', (e) => { if (!res.headersSent) { res.statusCode = 500; res.end('tts error'); } });
-    stream.pipe(res);
+    const chunks = [];
+    let hadError = false;
+
+    stream.on('error', (e) => {
+      hadError = true;
+      if (!res.headersSent) { res.statusCode = 500; res.end('tts stream error: ' + e.message); }
+    });
+
+    stream.on('data', (chunk) => chunks.push(chunk));
+
+    stream.on('end', () => {
+      if (hadError) return;
+      const buffer = Buffer.concat(chunks);
+      if (!buffer.length) {
+        if (!res.headersSent) { res.statusCode = 500; res.end('empty audio'); }
+        return;
+      }
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Length', buffer.length);
+      res.end(buffer);
+    });
   } catch (e) {
-    res.statusCode = 500; res.end('error: ' + e.message);
+    res.statusCode = 500;
+    res.end('error: ' + e.message);
   }
 };
