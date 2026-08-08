@@ -1,0 +1,12 @@
+{
+  "name": "edge-tts-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "edge-tts relay for 听读台 (zero-key TTS proxy)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "edge-tts": "*"
+  }
+}
